@@ -1,0 +1,38 @@
+# Node
+node_modules/
+dist/
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Models & Data (ignoring large datasets if needed, but we keep models for deployment)
+# data/
+# *.pkl (Uncomment if models are too large, but these are small enough for github)
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Write-ups
+*.docx
+*.md
+!README.md
+!frontend/README.md
+TRIPLE_D.zip
+TRIPLE_D_TEMP/
+docx/
+convert_md_to_docx.py
+document_text.txt
+
+pandoc*.msi
+Neural_Threat_Intelligence_Source_Code.zip
