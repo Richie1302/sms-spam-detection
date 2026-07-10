@@ -18,7 +18,7 @@ export default function Settings() {
   const [auditLog, setAuditLog] = useState(true);
   const [realTimeMonitor, setRealTimeMonitor] = useState(true);
   const [dataRetention, setDataRetention] = useState(7);
-  const [confThreshold, setConfThreshold] = useState(85);
+  const [confThreshold, setConfThreshold] = useState(50);
   const [saved, setSaved] = useState(false);
   const [desktopNotifs, setDesktopNotifs] = useState(false);
   const [notifPermission, setNotifPermission] = useState(
@@ -58,6 +58,7 @@ export default function Settings() {
   };
 
   const handleSave = () => {
+    localStorage.setItem('confThreshold', confThreshold);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };

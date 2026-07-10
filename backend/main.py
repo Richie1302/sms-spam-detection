@@ -37,6 +37,7 @@ except Exception as e:
 
 class MessageRequest(BaseModel):
     message: str
+    threshold: float = 50.0
 
 try:
     STOP_WORDS = set(stopwords.words('english'))
@@ -119,12 +120,11 @@ async def predict_spam(request: MessageRequest):
     vectorized_text = vectorizer.transform([clean_text])
 
     # Predict
-    prediction = model.predict(vectorized_text)[0]
     probabilities = model.predict_proba(vectorized_text)[0]
-
-    label = "spam" if prediction == 1 else "ham"
     spam_prob = round(float(probabilities[1]) * 100, 2)
     ham_prob = round(float(probabilities[0]) * 100, 2)
+
+    label = "spam" if spam_prob >= request.threshold else "ham"
     confidence = spam_prob if label == "spam" else ham_prob
 
     # Update session stats
@@ -149,6 +149,7 @@ async def predict_spam(request: MessageRequest):
         "preprocessing_steps": steps,
         "model_used": "Multinomial Naive Bayes + SMOTE",
         "feature_space": "TF-IDF (5,000 features)",
+        "threshold_used": request.threshold,
     }
 
 @app.get("/stats")
