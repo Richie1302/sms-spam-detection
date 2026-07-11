@@ -1,64 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState } from 'react';
 import { 
   Activity, ShieldAlert, CheckCircle, XCircle, 
-  Pause, Play, Trash2, Download, Filter, 
-  Wifi, Globe, AlertTriangle, Shield
+  Trash2, Download, Filter, AlertTriangle, Shield
 } from 'lucide-react';
 
-const GEO_LOCATIONS = ['[RU]', '[CN]', '[NG]', '[US]', '[BR]', '[KP]', '[IN]', '[DE]', '[UA]', '[IR]'];
-const PROTOCOLS = ['TCP/80', 'TCP/443', 'SMPP/2775', 'UDP/53', 'HTTP/8080', 'HTTPS/8443', 'GSM/SMS'];
-const THREAT_VECTORS = [
-  'Phishing URL Detected',
-  'Smishing Payload Intercepted',
-  'Suspicious Keyword Cluster',
-  'Bulk SMS Pattern',
-  'Spoofed Sender ID',
-  'Malicious Redirect Chain',
-  'OTP Harvesting Attempt',
-  'Prize Scam Template',
-  'Neural Clearance Passed',
-  'Routine Traffic Scanned',
-];
-const STATUSES = ['BLOCKED', 'BLOCKED', 'ALLOWED', 'FLAGGED', 'ALLOWED', 'BLOCKED', 'ALLOWED'];
-const DUMMY_IPS = () => `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`;
-
 export default function ThreatFeeds({ scanHistory, setScanHistory }) {
-  const [liveTraffic, setLiveTraffic] = useState([]);
-  const [isPaused, setIsPaused] = useState(false);
   const [filter, setFilter] = useState('all');
-  const terminalRef = useRef(null);
-  const intervalRef = useRef(null);
-
-  useEffect(() => {
-    if (!isPaused) {
-      intervalRef.current = setInterval(() => {
-        const status = STATUSES[Math.floor(Math.random() * STATUSES.length)];
-        const newLog = {
-          id: Math.random().toString(36).substr(2, 9),
-          time: new Date().toLocaleTimeString(),
-          ip: `${DUMMY_IPS()} ${GEO_LOCATIONS[Math.floor(Math.random() * GEO_LOCATIONS.length)]}`,
-          protocol: PROTOCOLS[Math.floor(Math.random() * PROTOCOLS.length)],
-          vector: THREAT_VECTORS[Math.floor(Math.random() * THREAT_VECTORS.length)],
-          status,
-        };
-        setLiveTraffic(prev => {
-          const updated = [newLog, ...prev];
-          if (updated.length > 12) updated.pop();
-          return updated;
-        });
-      }, 1200);
-    } else {
-      clearInterval(intervalRef.current);
-    }
-    return () => clearInterval(intervalRef.current);
-  }, [isPaused]);
-
-  // Auto-scroll terminal to top
-  useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = 0;
-    }
-  }, [liveTraffic]);
 
   const filteredHistory = scanHistory.filter(s => {
     if (filter === 'spam') return s.label === 'spam';
@@ -85,11 +32,6 @@ export default function ThreatFeeds({ scanHistory, setScanHistory }) {
     URL.revokeObjectURL(url);
   };
 
-  const statusColor = (status) => {
-    if (status === 'BLOCKED') return 'term-blocked';
-    if (status === 'FLAGGED') return 'term-flagged';
-    return 'term-allowed';
-  };
 
   return (
     <div className="page-container">
@@ -97,14 +39,14 @@ export default function ThreatFeeds({ scanHistory, setScanHistory }) {
       <div className="feeds-page-header">
         <div>
           <h1 className="page-title">Live Threat Feeds</h1>
-          <p className="page-subtitle">Real-time SMS vector monitoring and neural network routing intelligence</p>
+          <p className="page-subtitle">Session-based SMS scan history and threat classification log.</p>
         </div>
         <div className="feeds-header-stats">
           <div className="hstat-card">
-            <Wifi size={16} className="hstat-icon cyan" />
+            <Activity size={16} className="hstat-icon cyan" />
             <div>
-              <span className="hstat-val">{liveTraffic.length}</span>
-              <span className="hstat-label">Live Packets</span>
+              <span className="hstat-val">{scanHistory.length}</span>
+              <span className="hstat-label">Total Scans</span>
             </div>
           </div>
           <div className="hstat-card">
@@ -124,42 +66,7 @@ export default function ThreatFeeds({ scanHistory, setScanHistory }) {
         </div>
       </div>
 
-      {/* Live Traffic Terminal */}
-      <div className="bg-panel feeds-terminal-panel">
-        <div className="bg-panel-header flex-header">
-          <span><Globe size={14} style={{display:'inline',marginRight:6}} />NETWORK TRAFFIC MONITOR (LIVE)</span>
-          <div className="terminal-controls">
-            <span className={`live-indicator ${isPaused ? 'paused' : ''}`}>
-              {isPaused ? '⏸ PAUSED' : '● LIVE'}
-            </span>
-            <button
-              className={`term-ctrl-btn ${isPaused ? 'btn-play' : 'btn-pause'}`}
-              onClick={() => setIsPaused(p => !p)}
-            >
-              {isPaused ? <Play size={14} /> : <Pause size={14} />}
-              {isPaused ? 'Resume' : 'Pause'}
-            </button>
-          </div>
-        </div>
-        <div className="terminal-window" ref={terminalRef}>
-          <div className="term-header-row">
-            <span>TIME</span>
-            <span>SOURCE IP / GEO</span>
-            <span>PROTOCOL</span>
-            <span>VECTOR ANALYSIS</span>
-            <span>STATUS</span>
-          </div>
-          {liveTraffic.map(log => (
-            <div key={log.id} className={`terminal-line rich-line ${statusColor(log.status)}`}>
-              <span className="term-time">{log.time}</span>
-              <span className="term-ip">{log.ip}</span>
-              <span className="term-proto">{log.protocol}</span>
-              <span className="term-vector">{log.vector}</span>
-              <span className={`term-status-badge ${statusColor(log.status)}`}>{log.status}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+
 
       {/* Scan History Panel */}
       <div className="bg-panel feeds-history-panel">

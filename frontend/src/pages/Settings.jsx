@@ -14,11 +14,24 @@ function Toggle({ checked, onChange }) {
 }
 
 export default function Settings() {
-  const [autoQuarantine, setAutoQuarantine] = useState(true);
-  const [auditLog, setAuditLog] = useState(true);
-  const [realTimeMonitor, setRealTimeMonitor] = useState(true);
+  const [autoQuarantine, setAutoQuarantine] = useState(() => {
+    const stored = localStorage.getItem('autoQuarantine');
+    return stored !== null ? stored === 'true' : true;
+  });
+  const [auditLog, setAuditLog] = useState(() => {
+    const stored = localStorage.getItem('auditLog');
+    return stored !== null ? stored === 'true' : true;
+  });
+  const [realTimeMonitor, setRealTimeMonitor] = useState(() => {
+    const stored = localStorage.getItem('realTimeMonitor');
+    return stored !== null ? stored === 'true' : true;
+  });
   const [dataRetention, setDataRetention] = useState(7);
-  const [confThreshold, setConfThreshold] = useState(50);
+  const [confThreshold, setConfThreshold] = useState(() => {
+    const stored = localStorage.getItem('confThreshold');
+    const parsed = parseFloat(stored);
+    return !isNaN(parsed) ? parsed : 50;
+  });
   const [saved, setSaved] = useState(false);
   const [desktopNotifs, setDesktopNotifs] = useState(false);
   const [notifPermission, setNotifPermission] = useState(
@@ -59,6 +72,9 @@ export default function Settings() {
 
   const handleSave = () => {
     localStorage.setItem('confThreshold', confThreshold);
+    localStorage.setItem('autoQuarantine', String(autoQuarantine));
+    localStorage.setItem('auditLog', String(auditLog));
+    localStorage.setItem('realTimeMonitor', String(realTimeMonitor));
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };

@@ -31,7 +31,14 @@ function useClickOutside(ref, handler) {
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [scanHistory, setScanHistory] = useState([]);
+  const [scanHistory, setScanHistory] = useState(() => {
+    try {
+      const stored = localStorage.getItem('scanHistory');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [showNotifications, setShowNotifications] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
@@ -48,6 +55,14 @@ export default function App() {
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('scanHistory', JSON.stringify(scanHistory));
+    } catch {
+      // localStorage may be full or unavailable; fail silently
+    }
+  }, [scanHistory]);
+
   const addScanToHistory = (scan) => setScanHistory(prev => [scan, ...prev]);
 
   const markAllRead = () => setNotifications(prev => prev.map(n => ({ ...n, read: true })));
@@ -58,11 +73,11 @@ export default function App() {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'dashboard': return <Dashboard addScanToHistory={addScanToHistory} />;
+      case 'dashboard': return <Dashboard addScanToHistory={addScanToHistory} scanHistory={scanHistory} />;
       case 'feeds': return <ThreatFeeds scanHistory={scanHistory} setScanHistory={setScanHistory} />;
       case 'analytics': return <Analytics />;
       case 'settings': return <SettingsPage />;
-      default: return <Dashboard addScanToHistory={addScanToHistory} />;
+      default: return <Dashboard addScanToHistory={addScanToHistory} scanHistory={scanHistory} />;
     }
   };
 

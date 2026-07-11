@@ -39,6 +39,14 @@ class MessageRequest(BaseModel):
     message: str
     threshold: float = 50.0
 
+# Admin credentials — verified server-side only, never sent to the client
+VALID_USERNAME = "admin"
+VALID_PASSWORD = "admin123"
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
 try:
     STOP_WORDS = set(stopwords.words('english'))
 except Exception as e:
@@ -110,6 +118,13 @@ session_stats = {"total_scans": 0, "spam_count": 0, "ham_count": 0}
 @app.get("/")
 async def root():
     return {"status": "Neural Threat Intelligence API is live", "model": "MNB + SMOTE v1.0"}
+
+@app.post("/login")
+async def login(request: LoginRequest):
+    from fastapi.responses import JSONResponse
+    if request.username == VALID_USERNAME and request.password == VALID_PASSWORD:
+        return {"success": True}
+    return JSONResponse(status_code=401, content={"success": False})
 
 @app.post("/predict")
 async def predict_spam(request: MessageRequest):

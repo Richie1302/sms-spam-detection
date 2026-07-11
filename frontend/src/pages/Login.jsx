@@ -14,23 +14,34 @@ export default function Login({ onLogin }) {
     return () => clearInterval(t);
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!username.trim() || !password.trim()) return;
 
     setLoading(true);
     setError(false);
 
-    // Intentional slight delay for authentic feel
-    setTimeout(() => {
-      if (username === 'admin' && password === 'admin123') {
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000';
+      const response = await fetch(`${apiUrl}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+      });
+      const data = await response.json();
+
+      if (data.success) {
         setAccessGranted(true);
         setTimeout(() => onLogin(), 1400);
       } else {
         setError(true);
         setLoading(false);
       }
-    }, 1000);
+    } catch {
+      // Backend unreachable or network error — treat as auth failure
+      setError(true);
+      setLoading(false);
+    }
   };
 
   return (
