@@ -172,7 +172,7 @@ export default function Dashboard({ addScanToHistory, scanHistory = [] }) {
       }
 
     } catch (err) {
-      setError('Connection failed. Make sure the backend is running on port 8000.');
+      setError(`Connection failed. Make sure the backend is running at ${apiUrl}.`);
     } finally {
       setLoading(false);
     }
